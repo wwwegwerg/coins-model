@@ -18,7 +18,7 @@ COMMON_TRAIN_ARGS = dict(
     optimizer="auto",
     patience=20,
     save_period=10,
-    cache=True,
+    cache=False,
     # аугментации
     # auto_augment=None,
     # erasing=0.0,
