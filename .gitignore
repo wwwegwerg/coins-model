@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+
+runs/
+dataset_coins/
+*.pt
+*.onnx
+
+.DS_Store
+
+.cursor
