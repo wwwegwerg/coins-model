@@ -1,7 +1,5 @@
 # Coins YOLO
 
-Проект запускается через `main.py`, но внутренняя логика теперь разделена по Python-модулям.
-
 ## Режимы
 
 В `coins_model/config.py` есть параметр `MODE` с тремя режимами:
@@ -62,11 +60,12 @@ runs/
 ## Запуск
 
 1. Установить `uv`
-2. Проверить параметры в `coins_model/config.py`:
+2. В директорию проекта добавить `dataset_coins`
+3. Проверить параметры в `coins_model/config.py`:
    - `MODE` — режим работы (`train`, `resume`, `finetune`)
    - `CKPT_PATH` — путь к checkpoint (для `resume`/`finetune`), должен указывать на `runs/train/<run_name>/weights/last.pt` или `best.pt`
    - Остальные параметры обучения
-3. В директории проекта выполнить:
+4. В директории проекта выполнить:
 
 ```bash
 uv sync
