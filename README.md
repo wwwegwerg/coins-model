@@ -1,24 +1,5 @@
 # Coins YOLO
 
-## Режимы
-
-В `coins_model/config.py` есть параметр `MODE` с тремя режимами:
-
-- `"train"` - тренировка новой модели от pretrained-весов
-- `"resume"` - продолжение незавершенного run через `resume=True`
-- `"finetune"` - дообучение от указанного checkpoint как новый запуск
-
-Там же задаются основные параметры:
-
-- `MODEL_NAME`
-- `CKPT_PATH`
-- `EPOCHS`
-- `RESUME_TOTAL_EPOCHS`
-- `IMGSZ`
-- `BATCH`
-- `WORKERS`
-- `DEVICE`
-
 ## Структура
 
 ```text
@@ -27,45 +8,72 @@ coins-model/
   coins_model/
     app.py
     config.py
-    shared.py
-    evaluate.py
-    export.py
-    modes/
-      train.py
-      resume.py
-      finetune.py
 ```
 
-## Структура артефактов (runs/)
+Вся runtime-логика находится в `coins_model/app.py`, а все настраиваемые параметры вынесены в `coins_model/config.py`.
 
-Все результаты обучения, валидации и экспорта сохраняются в папке `runs/` с единой структурой:
+## Конфиг
+
+В `coins_model/config.py` используются 5 блоков:
+
+- `PATHS` - куда сохраняются артефакты
+- `RUN` - режим, модель, checkpoint и количество эпох
+- `RUN_PREFIXES` - префиксы имён запусков
+- `TRAIN` - параметры `model.train(...)`
+- `VALIDATE` - параметры `model.val(...)`
+- `EXPORT` - параметры `model.export(...)`
+
+### Режимы
+
+`RUN["mode"]` может быть одним из значений:
+
+- `"train"` - новая тренировка от pretrained-весов
+- `"resume"` - продолжение незавершённого run через `resume=True`
+- `"finetune"` - дообучение от checkpoint как новый запуск
+
+### Что обычно редактировать
+
+- `RUN["mode"]`
+- `RUN["model_name"]`
+- `RUN["checkpoint_path"]`
+- `RUN["epochs"]`
+- `RUN["resume_total_epochs"]`
+- `TRAIN["imgsz"]`
+- `TRAIN["batch"]`
+- `TRAIN["workers"]`
+- `TRAIN["device"]`
+- `TRAIN["amp"]`
+- `TRAIN["optimizer"]`
+- `TRAIN["patience"]`
+- `TRAIN["save_period"]`
+- `TRAIN["cache"]`
+- `EXPORT["format"]`
+
+## Структура `runs/`
+
+Теперь артефакты должны складываться в предсказуемые директории без вложенного `runs/detect/...`:
 
 ```text
 runs/
   train/
-    train_YYYYMMDD_HHMMSS/     # Артефакты тренировки
-    finetune_YYYYMMDD_HHMMSS/  # Артефакты дообучения
+    train_YYYYMMDD_HHMMSS/
+    finetune_YYYYMMDD_HHMMSS/
   val/
-    train_YYYYMMDD_HHMMSS/   # Результаты валидации для train
-    finetune_YYYYMMDD_HHMMSS/# Результаты валидации для finetune
+    train_YYYYMMDD_HHMMSS/
+    finetune_YYYYMMDD_HHMMSS/
   export/
-    train_YYYYMMDD_HHMMSS/   # ONNX-модели
-    finetune_YYYYMMDD_HHMMSS/# ONNX-модели после finetune
+    train_YYYYMMDD_HHMMSS/
+    finetune_YYYYMMDD_HHMMSS/
 ```
 
-Каждый запуск получает уникальное имя с префиксом режима и timestamp. Это имя используется для связывания артефактов тренировки, валидации и экспорта.
-
-**Важно:** Не переименовывайте папки в `runs/` вручную — это нарушит связь между чекпоинтами и их артефактами.
+Если использовать старые checkpoint из уже созданных каталогов с `runs/detect/...`, режим `resume` продолжит работать с ними как есть, но новые `train` и `finetune` должны сохраняться уже в нормальную структуру.
 
 ## Запуск
 
-1. Установить `uv`
-2. В директорию проекта добавить `dataset_coins`
-3. Проверить параметры в `coins_model/config.py`:
-   - `MODE` — режим работы (`train`, `resume`, `finetune`)
-   - `CKPT_PATH` — путь к checkpoint (для `resume`/`finetune`), должен указывать на `runs/train/<run_name>/weights/last.pt` или `best.pt`
-   - Остальные параметры обучения
-4. В директории проекта выполнить:
+1. Установить `uv`.
+2. Положить `dataset_coins` в корень проекта.
+3. Настроить `coins_model/config.py`.
+4. Запустить:
 
 ```bash
 uv sync
